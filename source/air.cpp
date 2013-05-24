@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-05-17                                             ||
+||    Last Edit Date: 2013-05-24                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -27,6 +27,14 @@
 ||    Gupta, R., K. Lee, R. Thompson, J. Yos.  "Calculations and Curve Fits  ||
 ||        of Thermodynamic and Transport Properties for Equilibrium Air to   ||
 ||        30000 K".  NASA Reference Publication 1260.  October 1991.         ||
+||                                                                           ||
+||    Moran, Michael J., Howard N. Shapiro.  "Fundamentals of Engineering    ||
+||        Thermodynamics".  5th Edition.  John Wiley and Sons.  Hoboken, NJ, ||
+||        2004.  ISBN 0-471-27471-2.                                         ||
+||                                                                           ||
+||    Liepmann, H. W., A. Roshko.  "Elements of Gasdynamics".  Dover         ||
+||        Publications.  2001.  (original copyright: New York.  John Wiley & ||
+||        Sons.  1957.)  ISBN 978-0-486-41963-3.                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  LICENSE    (MIT/X11 License)                                             ||
@@ -57,7 +65,7 @@
 /**
  *  @file air.cpp
  *  @author Gary Hammock, PE
- *  @date 2013-05-16
+ *  @date 2013-05-24
 */
 
 #include "air.h"
@@ -71,7 +79,7 @@
 Air::Air()
   : _temperature(0.0), _pressure(0.0), _enthalpy(0.0), _density(0.0),
     _cp(0.0), _gamma(0.0), _k(0.0), _pr(0.0), _mu(0.0), _nu(0.0),
-    _comp(0.0), _gasConstant(0.0), _soundSpeed(0.0)
+    _comp(0.0), _gasConstant(0.0), _entropy(0.0), _soundSpeed(0.0)
 {}
 
 /** Copy constructor.
@@ -87,7 +95,7 @@ Air::Air (const Air &copyFrom)
     _cp(copyFrom._cp), _gamma(copyFrom._gamma), _k(copyFrom._k),
     _pr(copyFrom._pr), _mu(copyFrom._mu), _nu(copyFrom._nu),
     _comp(copyFrom._comp), _gasConstant(copyFrom._gasConstant),
-    _soundSpeed(copyFrom._soundSpeed)
+    _entropy(copyFrom._entropy), _soundSpeed(copyFrom._soundSpeed)
 {}
 
 /** Initialization constructor.
@@ -221,6 +229,16 @@ double Air::getCompressibilityFactor (void) const
 double Air::getGasConstant (void) const
 {  return _gasConstant;  }
 
+/** Retrieve the specific entropy of the state (note: in this
+ *  implementation, entropy is a derived quantity).
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _entropy [units: kJ/kg-K]
+*/
+double Air::getEntropy (void) const
+{  return _entropy;  }
+
 /** Retrieve the calculated speed of sound of the state.
  *
  *  @pre The object is instantiated.
@@ -254,6 +272,7 @@ void Air::reset (void)
     _nu          = 0.0;  // Kinematic viscosity [m^2/s]
     _comp        = 0.0;  // Compressibility factor [-dimensionless-]
     _gasConstant = 0.0;  // Specific gas constant [units: kJ/kg-K]
+    _entropy     = 0.0;  // Air specific entropy [units: kJ/kg-K]
     _soundSpeed  = 0.0;  // The speed of sound of air [units: m/s]
 
     return;
@@ -323,6 +342,9 @@ bool Air::calculateProperties (double pressure, double temperature)
 
     // Calculate the kinematic viscosity [units: m^2/s]
     _nu = _mu / _density;
+
+    // Calculate the entropy of the state [units: kJ/kg-K]
+    _entropy = _calculateEntropy();
 
     // Calculate the speed of sound [units: m/s]
     //    1000.0 = convert kJ -> J
@@ -1536,4 +1558,45 @@ double Air::_calculateViscosity (double pressure, double temperature) const
     double viscosity = mu1 * 100.0 / 1000.0;
 
     return viscosity;
+}
+
+/** Calculate the entropy of the state using the stored pressure,
+ *  temperature, specific heat, and gas constant.
+ *
+ *  @pre The object is instantited and the values for _pressure,
+ *       _temperature, _gasConstant, and _cp have been calculated.
+ *  @post none.
+ *  @return A double precision value containing the calculated
+ *          entropy value [units: kJ/kg-K].
+*/
+double Air::_calculateEntropy (void) const
+{
+    /******************************************************
+    **  REFERENCES                                       **
+    ** ------------------------------------------------- **
+    **  1.) Moran, Michael J., Howard N. Shapiro.        **
+    **      "Fundamentals of Engineering                 **
+    **      Thermodynamics".  5th Edition.  John Wiley   **
+    **      and Sons.  Hoboken, NJ,  2004.               **
+    **      ISBN 0-471-27471-2.                          **
+    **                                                   **
+    ******************************************************/
+
+    double entropy,
+           T0 = 300.0,     // Reference temperature, 300 K
+           p0 = 0.101325,  // Reference pressure 0.101325 MPa (1 atm).
+           s0 = 1.70203;   // Reference ideal gas entropy [units: kJ/kg-K].
+                           //    (From Table A-22, Ref 1.)
+
+    // Calculate the entropy of the gas state.  This equation assumes a
+    // thermally and calorically perfect gas, (it is a limitation) but
+    // it's a pretty good assumption for most air cases.
+    //
+    //    (From Equation 6.23, Ref 1.)
+
+    entropy =   (_cp * log(_temperature / T0))        // Caloric component.
+              - (_gasConstant * log(_pressure / p0))  // enthalpic component.
+              + s0;                                   // Reference offset.
+
+    return entropy;
 }

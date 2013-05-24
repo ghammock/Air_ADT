@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-05-17                                             ||
+||    Last Edit Date: 2013-05-24                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -57,7 +57,7 @@
 /**
  *  @file air.h
  *  @author Gary Hammock, PE
- *  @date 2013-05-16
+ *  @date 2013-05-24
 */
 
 #ifndef _GH_DEF_AIR_H
@@ -210,6 +210,15 @@ class Air
     */
     double getGasConstant (void) const;
 
+    /** Retrieve the specific entropy of the state (note: in this
+     *  implementation, entropy is a derived quantity).
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _entropy [units: kJ/kg-K]
+    */
+    double getEntropy (void) const;
+
     /** Retrieve the calculated speed of sound of the state.
      *
      *  @pre The object is instantiated.
@@ -270,6 +279,7 @@ class Air
            _nu,           // Kinematic viscosity [m^2/s]
            _comp,         // Compressibility factor [-dimensionless-]
            _gasConstant,  // Specific gas constant [units: kJ/kg-K]
+           _entropy,      // Air specific entropy [units: kJ/kg-K]
            _soundSpeed;   // The speed of sound of air [units: m/s]
 
     // These coefficients are initialized in "airCoefficients.h"
@@ -419,6 +429,17 @@ class Air
      *  @return The calculated viscosity in units of kg/m-s.
     */
     double _calculateViscosity (double pressure, double temperature) const;
+
+    /** Calculate the entropy of the state using the stored pressure,
+     *  temperature, specific heat, and gas constant.
+     *
+     *  @pre The object is instantited and the values for _pressure,
+     *       _temperature, _gasConstant, and _cp have been calculated.
+     *  @post none.
+     *  @return A double precision value containing the calculated
+     *          entropy value [units: kJ/kg-K].
+    */
+    double _calculateEntropy (void) const;
 
 };  // end class Air
 
