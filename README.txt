@@ -59,6 +59,15 @@ List of accessor methods used by the ADT:
     double getCompressibilityFactor (void)
     double getGasConstant (void)
     double getSoundSpeed (void)
+    
+================================================================================
+                              DESIRED UPDATES
+================================================================================
+I have a legitimate need to have extended thermophysical properties through
+1000 atm (10 MPa).  If anyone has generated the curve fit coefficients, please
+consider including them (or contacting me).  I have Fought's paper containing
+the enthalpy coefficients, but specific heat and thermal conductivity are 
+the high priority coefficient sets.
 
 ================================================================================
                                  REFERENCES
