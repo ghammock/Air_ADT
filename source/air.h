@@ -28,6 +28,14 @@
 ||        of Thermodynamic and Transport Properties for Equilibrium Air to   ||
 ||        30000 K".  NASA Reference Publication 1260.  October 1991.         ||
 ||                                                                           ||
+||    Moran, Michael J., Howard N. Shapiro.  "Fundamentals of Engineering    ||
+||        Thermodynamics".  5th Edition.  John Wiley and Sons.  Hoboken, NJ, ||
+||        2004.  ISBN 0-471-27471-2.                                         ||
+||                                                                           ||
+||    Liepmann, H. W., A. Roshko.  "Elements of Gasdynamics".  Dover         ||
+||        Publications.  2001.  (original copyright: New York.  John Wiley & ||
+||        Sons.  1957.)  ISBN 978-0-486-41963-3.                             ||
+||                                                                           ||
 ||===========================================================================||
 ||  LICENSE    (MIT/X11 License)                                             ||
 ||===========================================================================||

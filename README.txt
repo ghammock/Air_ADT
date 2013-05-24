@@ -22,6 +22,7 @@ The data are to be read and stored in typical SI units as follows:
     Kinematic Viscosity, m^2/s
     Compressibility, -dimensionless-
     Gas Constant, kJ/kg-K
+    Entropy, kJ/kg-K
     Speed of Sound, m/s
 
 ================================================================================
@@ -58,6 +59,7 @@ List of accessor methods used by the ADT:
     double getKinematicViscosity (void)
     double getCompressibilityFactor (void)
     double getGasConstant (void)
+    double getEntropy (void)
     double getSoundSpeed (void)
     
 ================================================================================
@@ -75,3 +77,11 @@ the high priority coefficient sets.
 1.) Gupta, R., K. Lee, R. Thompson, J. Yos.  "Calculations and Curve Fits of
       Thermodynamic and Transport Properties for Equilibrium Air to 30000 K".
       NASA Reference Publication 1260.  October 1991.
+
+2.) Moran, Michael J., Howard N. Shapiro.  "Fundamentals of Engineering
+      Thermodynamics".  5th Edition.  John Wiley and Sons.  Hoboken, NJ, 2004.
+      ISBN 0-471-27471-2.
+
+3.) Liepmann, H. W., A. Roshko.  "Elements of Gasdynamics".  Dover Publications.
+      2001.  (original copyright: New York.  John Wiley & Sons.  1957.)
+      ISBN 978-0-486-41963-3.
