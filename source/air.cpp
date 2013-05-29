@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-05-24                                             ||
+||    Last Edit Date: 2013-05-28                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -65,7 +65,7 @@
 /**
  *  @file air.cpp
  *  @author Gary Hammock, PE
- *  @date 2013-05-24
+ *  @date 2013-05-28
 */
 
 #include "air.h"
@@ -79,7 +79,8 @@
 Air::Air()
   : _temperature(0.0), _pressure(0.0), _enthalpy(0.0), _density(0.0),
     _cp(0.0), _gamma(0.0), _k(0.0), _pr(0.0), _mu(0.0), _nu(0.0),
-    _comp(0.0), _gasConstant(0.0), _entropy(0.0), _soundSpeed(0.0)
+    _comp(0.0), _gasConstant(0.0), _entropy(0.0), _soundSpeed(0.0),
+    _refraction(0.0)
 {}
 
 /** Copy constructor.
@@ -95,7 +96,8 @@ Air::Air (const Air &copyFrom)
     _cp(copyFrom._cp), _gamma(copyFrom._gamma), _k(copyFrom._k),
     _pr(copyFrom._pr), _mu(copyFrom._mu), _nu(copyFrom._nu),
     _comp(copyFrom._comp), _gasConstant(copyFrom._gasConstant),
-    _entropy(copyFrom._entropy), _soundSpeed(copyFrom._soundSpeed)
+    _entropy(copyFrom._entropy), _soundSpeed(copyFrom._soundSpeed),
+    _refraction(copyFrom._refraction)
 {}
 
 /** Initialization constructor.
@@ -248,6 +250,15 @@ double Air::getEntropy (void) const
 double Air::getSoundSpeed (void) const
 {  return _soundSpeed;  }
 
+/** Retrieve the calculated index of refraction of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _refraction [-dimensionless-]
+*/
+double Air::getRefractionIndex (void) const
+{  return _refraction;  }
+
 ////////////////////
 //    Setters
 ////////////////////
@@ -274,6 +285,7 @@ void Air::reset (void)
     _gasConstant = 0.0;  // Specific gas constant [units: kJ/kg-K]
     _entropy     = 0.0;  // Air specific entropy [units: kJ/kg-K]
     _soundSpeed  = 0.0;  // The speed of sound of air [units: m/s]
+    _refraction  = 0.0;  // The index of refraction of air [-dimensionless-]
 
     return;
 }
@@ -349,6 +361,9 @@ bool Air::calculateProperties (double pressure, double temperature)
     // Calculate the speed of sound [units: m/s]
     //    1000.0 = convert kJ -> J
     _soundSpeed = sqrt(_gamma * _gasConstant * _temperature * 1000.0);
+
+    // Calculate the refractive index [-dimensionless-]
+    _refraction = _calculateRefractionIndex();
 
     return true;
 }
@@ -1582,11 +1597,13 @@ double Air::_calculateEntropy (void) const
     **                                                   **
     ******************************************************/
 
-    double entropy,
-           T0 = 300.0,     // Reference temperature, 300 K
-           p0 = 0.101325,  // Reference pressure 0.101325 MPa (1 atm).
-           s0 = 1.70203;   // Reference ideal gas entropy [units: kJ/kg-K].
-                           //    (From Table A-22, Ref 1.)
+    double entropy;
+
+    // Reference temperature, pressure, and entropy values.
+    // (From Table A-22, Ref 1.)
+    static const double T0 = 300.0,     // Ref. temperature, 300 K.
+                        p0 = 0.101325,  // Ref. pressure 0.101325 MPa (1 atm).
+                        s0 = 1.70203;   // Ref. entropy [units: kJ/kg-K].
 
     // Calculate the entropy of the gas state.  This equation assumes a
     // thermally and calorically perfect gas, (it is a limitation) but
@@ -1599,4 +1616,35 @@ double Air::_calculateEntropy (void) const
               + s0;                                   // Reference offset.
 
     return entropy;
+}
+
+/** Calculate the refractive index of air using the calculated density.
+ *
+ *  @pre The object is instantiated and the value for _density
+ *       has been computed.
+ *  @post none.
+ *  @return A double precision value for the calculated index of
+ *          refraction of air [-dimensionless-].
+*/
+double Air::_calculateRefractionIndex (void) const
+{
+    /******************************************************
+    **  REFERENCES                                       **
+    ** ------------------------------------------------- **
+    **  1.) Liepmann, H. W., A. Roshko.  "Elements of    **
+    **      Gasdynamics".  Dover Publications.  2001.    **
+    **      (original copyright: New York.  John Wiley & **
+    **      Sons.  1957.)  ISBN 978-0-486-41963-3.       **
+    **                                                   **
+    ******************************************************/
+
+    double refIndex;
+
+    static const double beta = 0.000292,            // Ref 1.
+                        rho0 = 1.2925694365458342;  // @ STP [units: kg/m^3].
+
+    // Calculate the refractive index. [-dimensionless-].
+    refIndex = 1.0 + (beta * _density / rho0);
+
+    return refIndex;
 }

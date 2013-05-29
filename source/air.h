@@ -235,6 +235,14 @@ class Air
     */
     double getSoundSpeed (void) const;
 
+    /** Retrieve the calculated index of refraction of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _refraction [-dimensionless-]
+    */
+    double getRefractionIndex (void) const;
+
     ////////////////////
     //    Setters
     ////////////////////
@@ -288,7 +296,8 @@ class Air
            _comp,         // Compressibility factor [-dimensionless-]
            _gasConstant,  // Specific gas constant [units: kJ/kg-K]
            _entropy,      // Air specific entropy [units: kJ/kg-K]
-           _soundSpeed;   // The speed of sound of air [units: m/s]
+           _soundSpeed,   // The speed of sound of air [units: m/s]
+           _refraction;   // The index of refraction of air [-dimensionless-]
 
     // These coefficients are initialized in "airCoefficients.h"
     static const double _h_coeffs[32][5];
@@ -448,6 +457,16 @@ class Air
      *          entropy value [units: kJ/kg-K].
     */
     double _calculateEntropy (void) const;
+
+    /** Calculate the refractive index of air using the calculated density.
+     *
+     *  @pre The object is instantiated and the value for _density
+     *       has been computed.
+     *  @post none.
+     *  @return A double precision value for the calculated index of
+     *          refraction of air [-dimensionless-].
+    */
+    double _calculateRefractionIndex (void) const;
 
 };  // end class Air
 
