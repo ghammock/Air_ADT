@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-05-28                                             ||
+||    Last Edit Date: 2013-05-30                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -65,7 +65,7 @@
 /**
  *  @file air.cpp
  *  @author Gary Hammock, PE
- *  @date 2013-05-28
+ *  @date 2013-05-30
 */
 
 #include "air.h"
@@ -77,10 +77,11 @@
 
 /** Default constructor.  */
 Air::Air()
-  : _temperature(0.0), _pressure(0.0), _enthalpy(0.0), _density(0.0),
-    _cp(0.0), _gamma(0.0), _k(0.0), _pr(0.0), _mu(0.0), _nu(0.0),
-    _comp(0.0), _gasConstant(0.0), _entropy(0.0), _soundSpeed(0.0),
-    _refraction(0.0)
+  : _temperature(0.0), _pressure(0.0), _enthalpy(0.0), _intEnergy(0.0),
+    _density(0.0), _cp(0.0), _gamma(0.0), _k(0.0), _pr(0.0), _mu(0.0),
+    _nu(0.0), _comp(0.0), _gasConstant(0.0), _molarMass(0.0),
+    _entropy(0.0), _soundSpeed(0.0), _refraction(0.0),
+    _gibbsEnergy(0.0), _helmholtzEn(0.0), _chemPoten(0.0)
 {}
 
 /** Copy constructor.
@@ -92,12 +93,15 @@ Air::Air()
 */
 Air::Air (const Air &copyFrom)
   : _temperature(copyFrom._temperature), _pressure(copyFrom._pressure),
-    _enthalpy(copyFrom._enthalpy), _density(copyFrom._density),
-    _cp(copyFrom._cp), _gamma(copyFrom._gamma), _k(copyFrom._k),
-    _pr(copyFrom._pr), _mu(copyFrom._mu), _nu(copyFrom._nu),
+    _enthalpy(copyFrom._enthalpy), _intEnergy(copyFrom._intEnergy),
+    _density(copyFrom._density), _cp(copyFrom._cp),
+    _gamma(copyFrom._gamma), _k(copyFrom._k), _pr(copyFrom._pr),
+    _mu(copyFrom._mu), _nu(copyFrom._nu),
     _comp(copyFrom._comp), _gasConstant(copyFrom._gasConstant),
-    _entropy(copyFrom._entropy), _soundSpeed(copyFrom._soundSpeed),
-    _refraction(copyFrom._refraction)
+    _molarMass(copyFrom._molarMass), _entropy(copyFrom._entropy),
+    _soundSpeed(copyFrom._soundSpeed), _refraction(copyFrom._refraction),
+    _gibbsEnergy(copyFrom._gibbsEnergy), _helmholtzEn(copyFrom._helmholtzEn),
+    _chemPoten(copyFrom._chemPoten)
 {}
 
 /** Initialization constructor.
@@ -149,6 +153,15 @@ double Air::getPressure (void) const
 */
 double Air::getEnthalpy (void) const
 {  return _enthalpy;  }
+
+/** Retrieve the internal energy of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _intEnergy [units: kJ/kg].
+*/
+double Air::getInternalEnergy (void) const
+{  return _intEnergy;  }
 
 /** Retrieve the density of the state.
  *
@@ -231,6 +244,15 @@ double Air::getCompressibilityFactor (void) const
 double Air::getGasConstant (void) const
 {  return _gasConstant;  }
 
+/** Retrieve the molar mass of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _molarMass [units: kg/kgmol].
+*/
+double Air::getMolarMass (void) const
+{  return _molarMass;  }
+
 /** Retrieve the specific entropy of the state (note: in this
  *  implementation, entropy is a derived quantity).
  *
@@ -259,6 +281,33 @@ double Air::getSoundSpeed (void) const
 double Air::getRefractionIndex (void) const
 {  return _refraction;  }
 
+/** Retrieve the specific Gibbs free energy (enthalpy) of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _gibbsEnergy [units: kJ/kg]
+*/
+double Air::getGibbsFreeEnergy (void) const
+{  return _gibbsEnergy;  }
+
+/** Retrieve the specific Helmholtz free energy of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _helmholtzEn [units: kJ/kg]
+*/
+double Air::getHelmholtzFreeEnergy (void) const
+{  return _helmholtzEn;  }
+
+/** Retrieve the chemical potential of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _chemPoten [units: kJ/kgmol].
+*/
+double Air::getChemicalPotential (void) const
+{  return _chemPoten;  }
+
 ////////////////////
 //    Setters
 ////////////////////
@@ -274,6 +323,7 @@ void Air::reset (void)
     _temperature = 0.0;  // Air temperature [units: K]
     _pressure    = 0.0;  // Air pressure [units: MPa]
     _enthalpy    = 0.0;  // Air enthalpy [units: kJ/kg]
+    _intEnergy   = 0.0;  // Specific internal energy [units: kJ/kg]
     _density     = 0.0;  // Air density [units: kg/m^3]
     _cp          = 0.0;  // Specific heat [units: kJ/kg-K]
     _gamma       = 0.0;  // Ratio of specific heats [-dimensionless-]
@@ -283,9 +333,13 @@ void Air::reset (void)
     _nu          = 0.0;  // Kinematic viscosity [m^2/s]
     _comp        = 0.0;  // Compressibility factor [-dimensionless-]
     _gasConstant = 0.0;  // Specific gas constant [units: kJ/kg-K]
+    _molarMass   = 0.0;  // The substance molar mass [units: kg/kgmol]
     _entropy     = 0.0;  // Air specific entropy [units: kJ/kg-K]
     _soundSpeed  = 0.0;  // The speed of sound of air [units: m/s]
     _refraction  = 0.0;  // The index of refraction of air [-dimensionless-]
+    _gibbsEnergy = 0.0;  // The specific Gibbs free energy [units: kJ/kg]
+    _helmholtzEn = 0.0;  // The specific Helmholtz free energy [units: kJ/kg]
+    _chemPoten   = 0.0;  // The chemical potential of air [units: kJ/kgmol]
 
     return;
 }
@@ -337,9 +391,12 @@ bool Air::calculateProperties (double pressure, double temperature)
     // Calculate the remaining thermodynamic properties.
     ////////////////////////////////////
 
+    // Store the molar mass of air [units: kg/kgmol]
+    _molarMass = 28.97;
+
     // Store the air gas constant in SI units [Units: kJ/(kg-K)]
-    //     28.97 = Molecular Mass of Air [kg/kgmol]
-    _gasConstant = 8.314 / 28.97;
+    //    8.314 = Universal gas constant [units: kJ/kgmol-K]
+    _gasConstant = 8.314 / _molarMass;
 
     // Calculate gamma based on the cp value [-dimensionless-]
     _gamma = _cp / (_cp - _gasConstant);
@@ -347,6 +404,12 @@ bool Air::calculateProperties (double pressure, double temperature)
     // Calculate the density [Units: kg/m^3]
     //    1000.0 = convert MPa -> kPa
     _density = (_pressure * 1000.0) / (_comp * _gasConstant * _temperature);
+
+    // Calculate the internal energy based on the thermodynamic relation:
+    //    h = u + p/rho
+    //    [units: kJ/kg]
+    //    1000.0 = convert MPa -> kPa
+    _intEnergy = _enthalpy - (_pressure * 1000.0 / _density);
 
     // Calculate the thermal conductivity [-dimensionless-]
     //    1000.0 = convert kJ -> J. (So that J/s = W)
@@ -364,6 +427,24 @@ bool Air::calculateProperties (double pressure, double temperature)
 
     // Calculate the refractive index [-dimensionless-]
     _refraction = _calculateRefractionIndex();
+
+    // Calculate the specific Gibbs free energy (enthalpy) using the relation:
+    //    G = H - TS
+    //    [units: kJ/kg]
+    _gibbsEnergy = _enthalpy - (_temperature * _entropy);
+
+    // Calculate the specific Helmholtz free energy using the relation:
+    //    F = U - TS
+    //    [units: kJ/kg]
+    _helmholtzEn = _intEnergy - (_temperature * _entropy);
+
+    // Calculate the chemical potential of the state which is defined as
+    // the Gibbs function (total) divided by the molar amount of substance.
+    // (Which is also the specific Gibbs function multiplied by the molar
+    // mass of the substance).  [units: kJ/kgmol]
+    //
+    //    ch = G / n = gm / n = gM
+    _chemPoten = _gibbsEnergy * _molarMass;
 
     return true;
 }

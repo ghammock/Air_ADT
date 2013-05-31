@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-05-24                                             ||
+||    Last Edit Date: 2013-05-30                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -65,7 +65,7 @@
 /**
  *  @file air.h
  *  @author Gary Hammock, PE
- *  @date 2013-05-24
+ *  @date 2013-05-30
 */
 
 #ifndef _GH_DEF_AIR_H
@@ -81,6 +81,10 @@
 ///////////////////////////////////////
 typedef unsigned int uint32;
 
+/**
+ *  @class Air An ADT to calculate and store the thermodynamic and
+ *         transport properties of equilibrium air.
+*/
 class Air
 {
   public:
@@ -145,6 +149,14 @@ class Air
      *  @return The value of _enthalpy [units: kJ/kg].
     */
     double getEnthalpy (void) const;
+
+    /** Retrieve the internal energy of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _intEnergy [units: kJ/kg].
+    */
+    double getInternalEnergy (void) const;
 
     /** Retrieve the density of the state.
      *
@@ -218,6 +230,14 @@ class Air
     */
     double getGasConstant (void) const;
 
+    /** Retrieve the molar mass of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _molarMass [units: kg/kgmol].
+    */
+    double getMolarMass (void) const;
+
     /** Retrieve the specific entropy of the state (note: in this
      *  implementation, entropy is a derived quantity).
      *
@@ -242,6 +262,30 @@ class Air
      *  @return The value of _refraction [-dimensionless-]
     */
     double getRefractionIndex (void) const;
+
+    /** Retrieve the specific Gibbs free energy (enthalpy) of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _gibbsEnergy [units: kJ/kg]
+    */
+    double getGibbsFreeEnergy (void) const;
+
+    /** Retrieve the specific Helmholtz free energy of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _helmholtzEn [units: kJ/kg]
+    */
+    double getHelmholtzFreeEnergy (void) const;
+
+    /** Retrieve the chemical potential of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _chemPoten [units: kJ/kgmol].
+    */
+    double getChemicalPotential (void) const;
 
     ////////////////////
     //    Setters
@@ -286,6 +330,7 @@ class Air
     double _temperature,  // Air temperature [units: K]
            _pressure,     // Air pressure [units: MPa]
            _enthalpy,     // Air enthalpy [units: kJ/kg]
+           _intEnergy,    // Specific internal energy [units: kJ/kg]
            _density,      // Air density [units: kg/m^3]
            _cp,           // Specific heat [units: kJ/kg-K]
            _gamma,        // Ratio of specific heats [-dimensionless-]
@@ -295,9 +340,13 @@ class Air
            _nu,           // Kinematic viscosity [m^2/s]
            _comp,         // Compressibility factor [-dimensionless-]
            _gasConstant,  // Specific gas constant [units: kJ/kg-K]
+           _molarMass,    // The substance molar mass [units: kg/kgmol]
            _entropy,      // Air specific entropy [units: kJ/kg-K]
            _soundSpeed,   // The speed of sound of air [units: m/s]
-           _refraction;   // The index of refraction of air [-dimensionless-]
+           _refraction,   // The index of refraction of air [-dimensionless-]
+           _gibbsEnergy,  // The specific Gibbs free energy [units: kJ/kg].
+           _helmholtzEn,  // The specific Helmholtz free energy [units: kJ/kg]
+           _chemPoten;    // The chemical potential of air [units: kJ/kgmol]
 
     // These coefficients are initialized in "airCoefficients.h"
     static const double _h_coeffs[32][5];
