@@ -71,6 +71,10 @@
 #include "air.h"
 #include "airCoefficients.h"
 
+// Define the universal gas constant:
+//    8.314462175 kJ/kgmol-K
+const double Air::_R_univ = 8.314462175;
+
 /******************************************************
 **           Constructors / Destructors              **
 ******************************************************/
@@ -392,11 +396,11 @@ bool Air::calculateProperties (double pressure, double temperature)
     ////////////////////////////////////
 
     // Store the molar mass of air [units: kg/kgmol]
-    _molarMass = 28.97;
+    _molarMass = 28.96755;
 
     // Store the air gas constant in SI units [Units: kJ/(kg-K)]
     //    8.314 = Universal gas constant [units: kJ/kgmol-K]
-    _gasConstant = 8.314 / _molarMass;
+    _gasConstant = _R_univ / _molarMass;
 
     // Calculate gamma based on the cp value [-dimensionless-]
     _gamma = _cp / (_cp - _gasConstant);

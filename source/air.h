@@ -348,6 +348,8 @@ class Air
            _helmholtzEn,  // The specific Helmholtz free energy [units: kJ/kg]
            _chemPoten;    // The chemical potential of air [units: kJ/kgmol]
 
+    static const double _R_univ;  // Universal gas constant [units: kJ/kgmol-K]
+
     // These coefficients are initialized in "airCoefficients.h"
     static const double _h_coeffs[32][5];
     static const double _cp_coeffs[52][5];
