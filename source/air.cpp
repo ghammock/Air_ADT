@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-05-30                                             ||
+||    Last Edit Date: 2013-06-04                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -65,7 +65,7 @@
 /**
  *  @file air.cpp
  *  @author Gary Hammock, PE
- *  @date 2013-05-30
+ *  @date 2013-06-04
 */
 
 #include "air.h"
@@ -472,8 +472,10 @@ bool Air::calculateProps_PH (double pressure, double enthalpy)
     // specific heat (1.005 kJ/kg-K) and the input enthalpy.
     double temperature = enthalpy / 1.005;  // units: K
 
+    // Enthalpy convergence tolerance [units: kJ/kg]
+    const double tolerance = 1E-4;
+
     double calcH = 0.0,      // The calculated enthalpy [units: kJ/kg]
-           tolerance = 1E-4, // Enthalpy convergence tolerance [units: kJ/kg]
            deltaT = 1000.0,  // Iterative temperature interval [units: K]
            T_under = 0.0,    // Stored temp. from prev. low iteration [K]
            h_under = 0.0;    // Stored enthalpy from prev. low iter. [kJ/kg]
@@ -537,10 +539,10 @@ double Air::_interpolate (double p1, double p2,
     double propValue,
            p = _pressure / 0.101325;
 
-    propValue = (((log(phi_2) - log(phi_1)) / (log(p2) - log(p1)))
-                           * (log(p) - log(p1))) + log(phi_1);
+    propValue = (((log10(phi_2) - log10(phi_1)) / (log10(p2) - log10(p1)))
+                           * (log10(p) - log10(p1))) + log10(phi_1);
 
-    propValue = exp(propValue);
+    propValue = pow(10.0, propValue);
 
     return propValue;
 }
@@ -552,9 +554,10 @@ double Air::_interpolate (double p1, double p2,
  *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
  *  @post none.
  *  @param pressure The order-of-magnitude of the pressure of interest.
+ *  @param temperature The temperature of the state in K.
  *  @return An index into the _h_coeffs array.
 */
-uint32 Air::_get_h_row (double pressure) const
+uint32 Air::_get_h_row (double pressure, double temperature) const
 {
     uint32 temperatureOffset,
            pressureOffset,
@@ -599,12 +602,12 @@ uint32 Air::_get_h_row (double pressure) const
     ////////////////////
     if (pressureOffset == 0)
     {
-             if (_temperature <  2250.0) temperatureOffset = 0;
-        else if (_temperature <  4250.0) temperatureOffset = 1;
-        else if (_temperature <  6750.0) temperatureOffset = 2;
-        else if (_temperature < 10750.0) temperatureOffset = 3;
-        else if (_temperature < 17750.0) temperatureOffset = 4;
-        else                             temperatureOffset = 5;
+             if (temperature <  2250.0) temperatureOffset = 0;
+        else if (temperature <  4250.0) temperatureOffset = 1;
+        else if (temperature <  6750.0) temperatureOffset = 2;
+        else if (temperature < 10750.0) temperatureOffset = 3;
+        else if (temperature < 17750.0) temperatureOffset = 4;
+        else                            temperatureOffset = 5;
     }
 
     ///////////////////////////////////
@@ -612,12 +615,12 @@ uint32 Air::_get_h_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 6)
     {
-             if (_temperature <  2250.0) temperatureOffset = 0;
-        else if (_temperature <  4250.0) temperatureOffset = 1;
-        else if (_temperature <  6750.0) temperatureOffset = 2;
-        else if (_temperature < 11750.0) temperatureOffset = 3;
-        else if (_temperature < 18750.0) temperatureOffset = 4;
-        else                             temperatureOffset = 5;
+             if (temperature <  2250.0) temperatureOffset = 0;
+        else if (temperature <  4250.0) temperatureOffset = 1;
+        else if (temperature <  6750.0) temperatureOffset = 2;
+        else if (temperature < 11750.0) temperatureOffset = 3;
+        else if (temperature < 18750.0) temperatureOffset = 4;
+        else                            temperatureOffset = 5;
     }
 
     ///////////////////////////////////
@@ -625,11 +628,11 @@ uint32 Air::_get_h_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 12)
     {
-             if (_temperature <  2750.0) temperatureOffset = 0;
-        else if (_temperature <  5250.0) temperatureOffset = 1;
-        else if (_temperature <  9750.0) temperatureOffset = 2;
-        else if (_temperature < 17750.0) temperatureOffset = 3;
-        else                             temperatureOffset = 4;
+             if (temperature <  2750.0) temperatureOffset = 0;
+        else if (temperature <  5250.0) temperatureOffset = 1;
+        else if (temperature <  9750.0) temperatureOffset = 2;
+        else if (temperature < 17750.0) temperatureOffset = 3;
+        else                            temperatureOffset = 4;
     }
 
     ///////////////////////////////////
@@ -637,10 +640,10 @@ uint32 Air::_get_h_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 17)
     {
-             if (_temperature <  3250.0) temperatureOffset = 0;
-        else if (_temperature <  6250.0) temperatureOffset = 1;
-        else if (_temperature < 15250.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  3250.0) temperatureOffset = 0;
+        else if (temperature <  6250.0) temperatureOffset = 1;
+        else if (temperature < 15250.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     ///////////////////////////////////
@@ -648,10 +651,10 @@ uint32 Air::_get_h_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 21)
     {
-             if (_temperature <  3750.0) temperatureOffset = 0;
-        else if (_temperature <  8250.0) temperatureOffset = 1;
-        else if (_temperature < 17750.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  3750.0) temperatureOffset = 0;
+        else if (temperature <  8250.0) temperatureOffset = 1;
+        else if (temperature < 17750.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     ///////////////////////////////////
@@ -659,10 +662,10 @@ uint32 Air::_get_h_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 25)
     {
-             if (_temperature <  4250.0) temperatureOffset = 0;
-        else if (_temperature <  9250.0) temperatureOffset = 1;
-        else if (_temperature < 18750.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  4250.0) temperatureOffset = 0;
+        else if (temperature <  9250.0) temperatureOffset = 1;
+        else if (temperature < 18750.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     ///////////////////////////////////
@@ -670,9 +673,9 @@ uint32 Air::_get_h_row (double pressure) const
     ////////////////////
     else
     {
-             if (_temperature <  6250.0) temperatureOffset = 0;
-        else if (_temperature < 12750.0) temperatureOffset = 1;
-        else                             temperatureOffset = 2;
+             if (temperature <  6250.0) temperatureOffset = 0;
+        else if (temperature < 12750.0) temperatureOffset = 1;
+        else                            temperatureOffset = 2;
     }
 
     hOffset = pressureOffset + temperatureOffset;
@@ -687,9 +690,10 @@ uint32 Air::_get_h_row (double pressure) const
  *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
  *  @post none.
  *  @param pressure The order-of-magnitude of the pressure of interest.
+ *  @param temperature The temperature of the state in K.
  *  @return An index into the _cp_coeffs array.
 */
-uint32 Air::_get_cp_row (double pressure) const
+uint32 Air::_get_cp_row (double pressure, double temperature) const
 {
     uint32 temperatureOffset,
            pressureOffset,
@@ -734,15 +738,15 @@ uint32 Air::_get_cp_row (double pressure) const
     ////////////////////
     if (pressureOffset == 0)
     {
-             if (_temperature <  1250.0) temperatureOffset = 0;
-        else if (_temperature <  1750.0) temperatureOffset = 1;
-        else if (_temperature <  2750.0) temperatureOffset = 2;
-        else if (_temperature <  4750.0) temperatureOffset = 3;
-        else if (_temperature <  6250.0) temperatureOffset = 4;
-        else if (_temperature <  9750.0) temperatureOffset = 5;
-        else if (_temperature < 14250.0) temperatureOffset = 6;
-        else if (_temperature < 19750.0) temperatureOffset = 7;
-        else                             temperatureOffset = 8;
+             if (temperature <  1250.0) temperatureOffset = 0;
+        else if (temperature <  1750.0) temperatureOffset = 1;
+        else if (temperature <  2750.0) temperatureOffset = 2;
+        else if (temperature <  4750.0) temperatureOffset = 3;
+        else if (temperature <  6250.0) temperatureOffset = 4;
+        else if (temperature <  9750.0) temperatureOffset = 5;
+        else if (temperature < 14250.0) temperatureOffset = 6;
+        else if (temperature < 19750.0) temperatureOffset = 7;
+        else                            temperatureOffset = 8;
     }
 
     ///////////////////////////////////
@@ -750,14 +754,14 @@ uint32 Air::_get_cp_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 9)
     {
-             if (_temperature <  1250.0) temperatureOffset = 0;
-        else if (_temperature <  2250.0) temperatureOffset = 1;
-        else if (_temperature <  3750.0) temperatureOffset = 2;
-        else if (_temperature <  5250.0) temperatureOffset = 3;
-        else if (_temperature <  7250.0) temperatureOffset = 4;
-        else if (_temperature < 10750.0) temperatureOffset = 5;
-        else if (_temperature < 17250.0) temperatureOffset = 6;
-        else                             temperatureOffset = 7;
+             if (temperature <  1250.0) temperatureOffset = 0;
+        else if (temperature <  2250.0) temperatureOffset = 1;
+        else if (temperature <  3750.0) temperatureOffset = 2;
+        else if (temperature <  5250.0) temperatureOffset = 3;
+        else if (temperature <  7250.0) temperatureOffset = 4;
+        else if (temperature < 10750.0) temperatureOffset = 5;
+        else if (temperature < 17250.0) temperatureOffset = 6;
+        else                            temperatureOffset = 7;
     }
 
     ///////////////////////////////////
@@ -765,13 +769,13 @@ uint32 Air::_get_cp_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 17)
     {
-             if (_temperature <  1750.0) temperatureOffset = 0;
-        else if (_temperature <  2750.0) temperatureOffset = 1;
-        else if (_temperature <  4750.0) temperatureOffset = 2;
-        else if (_temperature <  6750.0) temperatureOffset = 3;
-        else if (_temperature < 12750.0) temperatureOffset = 4;
-        else if (_temperature < 19750.0) temperatureOffset = 5;
-        else                             temperatureOffset = 6;
+             if (temperature <  1750.0) temperatureOffset = 0;
+        else if (temperature <  2750.0) temperatureOffset = 1;
+        else if (temperature <  4750.0) temperatureOffset = 2;
+        else if (temperature <  6750.0) temperatureOffset = 3;
+        else if (temperature < 12750.0) temperatureOffset = 4;
+        else if (temperature < 19750.0) temperatureOffset = 5;
+        else                            temperatureOffset = 6;
     }
 
     ///////////////////////////////////
@@ -779,14 +783,14 @@ uint32 Air::_get_cp_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 24)
     {
-             if (_temperature <  1750.0) temperatureOffset = 0;
-        else if (_temperature <  2750.0) temperatureOffset = 1;
-        else if (_temperature <  4250.0) temperatureOffset = 2;
-        else if (_temperature <  6750.0) temperatureOffset = 3;
-        else if (_temperature <  9750.0) temperatureOffset = 4;
-        else if (_temperature < 15750.0) temperatureOffset = 5;
-        else if (_temperature < 21500.0) temperatureOffset = 6;
-        else                             temperatureOffset = 7;
+             if (temperature <  1750.0) temperatureOffset = 0;
+        else if (temperature <  2750.0) temperatureOffset = 1;
+        else if (temperature <  4250.0) temperatureOffset = 2;
+        else if (temperature <  6750.0) temperatureOffset = 3;
+        else if (temperature <  9750.0) temperatureOffset = 4;
+        else if (temperature < 15750.0) temperatureOffset = 5;
+        else if (temperature < 21500.0) temperatureOffset = 6;
+        else                            temperatureOffset = 7;
     }
 
     ///////////////////////////////////
@@ -794,13 +798,13 @@ uint32 Air::_get_cp_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 32)
     {
-             if (_temperature <  1750.0) temperatureOffset = 0;
-        else if (_temperature <  3250.0) temperatureOffset = 1;
-        else if (_temperature <  4750.0) temperatureOffset = 2;
-        else if (_temperature <  7750.0) temperatureOffset = 3;
-        else if (_temperature < 11750.0) temperatureOffset = 4;
-        else if (_temperature < 20500.0) temperatureOffset = 5;
-        else                             temperatureOffset = 6;
+             if (temperature <  1750.0) temperatureOffset = 0;
+        else if (temperature <  3250.0) temperatureOffset = 1;
+        else if (temperature <  4750.0) temperatureOffset = 2;
+        else if (temperature <  7750.0) temperatureOffset = 3;
+        else if (temperature < 11750.0) temperatureOffset = 4;
+        else if (temperature < 20500.0) temperatureOffset = 5;
+        else                            temperatureOffset = 6;
     }
 
     ///////////////////////////////////
@@ -808,13 +812,13 @@ uint32 Air::_get_cp_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 39)
     {
-             if (_temperature <  1750.0) temperatureOffset = 0;
-        else if (_temperature <  3250.0) temperatureOffset = 1;
-        else if (_temperature <  5750.0) temperatureOffset = 2;
-        else if (_temperature <  9250.0) temperatureOffset = 3;
-        else if (_temperature < 13750.0) temperatureOffset = 4;
-        else if (_temperature < 22500.0) temperatureOffset = 5;
-        else                             temperatureOffset = 6;
+             if (temperature <  1750.0) temperatureOffset = 0;
+        else if (temperature <  3250.0) temperatureOffset = 1;
+        else if (temperature <  5750.0) temperatureOffset = 2;
+        else if (temperature <  9250.0) temperatureOffset = 3;
+        else if (temperature < 13750.0) temperatureOffset = 4;
+        else if (temperature < 22500.0) temperatureOffset = 5;
+        else                            temperatureOffset = 6;
     }
 
     ///////////////////////////////////
@@ -822,12 +826,12 @@ uint32 Air::_get_cp_row (double pressure) const
     ////////////////////
     else
     {
-             if (_temperature <  1750.0) temperatureOffset = 0;
-        else if (_temperature <  3750.0) temperatureOffset = 1;
-        else if (_temperature <  6750.0) temperatureOffset = 2;
-        else if (_temperature < 10750.0) temperatureOffset = 3;
-        else if (_temperature < 17750.0) temperatureOffset = 4;
-        else                             temperatureOffset = 5;
+             if (temperature <  1750.0) temperatureOffset = 0;
+        else if (temperature <  3750.0) temperatureOffset = 1;
+        else if (temperature <  6750.0) temperatureOffset = 2;
+        else if (temperature < 10750.0) temperatureOffset = 3;
+        else if (temperature < 17750.0) temperatureOffset = 4;
+        else                            temperatureOffset = 5;
     }
 
     cpOffset = pressureOffset + temperatureOffset;
@@ -842,9 +846,10 @@ uint32 Air::_get_cp_row (double pressure) const
  *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
  *  @post none.
  *  @param pressure The order-of-magnitude of the pressure of interest.
+ *  @param temperature The temperature of the state in K.
  *  @return An index into the _k_coeffs array.
 */
-uint32 Air::_get_k_row (double pressure) const
+uint32 Air::_get_k_row (double pressure, double temperature) const
 {
     uint32 temperatureOffset,
            pressureOffset,
@@ -889,13 +894,13 @@ uint32 Air::_get_k_row (double pressure) const
     ////////////////////
     if (pressureOffset == 0)
     {
-             if (_temperature <  1750.0) temperatureOffset = 0;
-        else if (_temperature <  2750.0) temperatureOffset = 1;
-        else if (_temperature <  4750.0) temperatureOffset = 2;
-        else if (_temperature <  6250.0) temperatureOffset = 3;
-        else if (_temperature < 10250.0) temperatureOffset = 4;
-        else if (_temperature < 17750.0) temperatureOffset = 5;
-        else                             temperatureOffset = 6;
+             if (temperature <  1750.0) temperatureOffset = 0;
+        else if (temperature <  2750.0) temperatureOffset = 1;
+        else if (temperature <  4750.0) temperatureOffset = 2;
+        else if (temperature <  6250.0) temperatureOffset = 3;
+        else if (temperature < 10250.0) temperatureOffset = 4;
+        else if (temperature < 17750.0) temperatureOffset = 5;
+        else                            temperatureOffset = 6;
     }
 
     ///////////////////////////////////
@@ -903,13 +908,13 @@ uint32 Air::_get_k_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 7)
     {
-             if (_temperature <  1750.0) temperatureOffset = 0;
-        else if (_temperature <  2750.0) temperatureOffset = 1;
-        else if (_temperature <  4750.0) temperatureOffset = 2;
-        else if (_temperature <  6250.0) temperatureOffset = 3;
-        else if (_temperature < 11250.0) temperatureOffset = 4;
-        else if (_temperature < 18250.0) temperatureOffset = 5;
-        else                             temperatureOffset = 6;
+             if (temperature <  1750.0) temperatureOffset = 0;
+        else if (temperature <  2750.0) temperatureOffset = 1;
+        else if (temperature <  4750.0) temperatureOffset = 2;
+        else if (temperature <  6250.0) temperatureOffset = 3;
+        else if (temperature < 11250.0) temperatureOffset = 4;
+        else if (temperature < 18250.0) temperatureOffset = 5;
+        else                            temperatureOffset = 6;
     }
 
     ///////////////////////////////////
@@ -917,13 +922,13 @@ uint32 Air::_get_k_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 14)
     {
-             if (_temperature <  2250.0) temperatureOffset = 0;
-        else if (_temperature <  3250.0) temperatureOffset = 1;
-        else if (_temperature <  5750.0) temperatureOffset = 2;
-        else if (_temperature <  7750.0) temperatureOffset = 3;
-        else if (_temperature < 12750.0) temperatureOffset = 4;
-        else if (_temperature < 18750.0) temperatureOffset = 5;
-        else                             temperatureOffset = 6;
+             if (temperature <  2250.0) temperatureOffset = 0;
+        else if (temperature <  3250.0) temperatureOffset = 1;
+        else if (temperature <  5750.0) temperatureOffset = 2;
+        else if (temperature <  7750.0) temperatureOffset = 3;
+        else if (temperature < 12750.0) temperatureOffset = 4;
+        else if (temperature < 18750.0) temperatureOffset = 5;
+        else                            temperatureOffset = 6;
     }
 
     ///////////////////////////////////
@@ -931,12 +936,12 @@ uint32 Air::_get_k_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 21)
     {
-             if (_temperature <  2250.0) temperatureOffset = 0;
-        else if (_temperature <  4250.0) temperatureOffset = 1;
-        else if (_temperature <  6750.0) temperatureOffset = 2;
-        else if (_temperature <  9250.0) temperatureOffset = 3;
-        else if (_temperature < 16750.0) temperatureOffset = 4;
-        else                             temperatureOffset = 5;
+             if (temperature <  2250.0) temperatureOffset = 0;
+        else if (temperature <  4250.0) temperatureOffset = 1;
+        else if (temperature <  6750.0) temperatureOffset = 2;
+        else if (temperature <  9250.0) temperatureOffset = 3;
+        else if (temperature < 16750.0) temperatureOffset = 4;
+        else                            temperatureOffset = 5;
     }
 
     ///////////////////////////////////
@@ -944,12 +949,12 @@ uint32 Air::_get_k_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 27)
     {
-             if (_temperature <  2250.0) temperatureOffset = 0;
-        else if (_temperature <  4250.0) temperatureOffset = 1;
-        else if (_temperature <  7750.0) temperatureOffset = 2;
-        else if (_temperature < 10750.0) temperatureOffset = 3;
-        else if (_temperature < 19250.0) temperatureOffset = 4;
-        else                             temperatureOffset = 5;
+             if (temperature <  2250.0) temperatureOffset = 0;
+        else if (temperature <  4250.0) temperatureOffset = 1;
+        else if (temperature <  7750.0) temperatureOffset = 2;
+        else if (temperature < 10750.0) temperatureOffset = 3;
+        else if (temperature < 19250.0) temperatureOffset = 4;
+        else                            temperatureOffset = 5;
     }
 
     ///////////////////////////////////
@@ -957,11 +962,11 @@ uint32 Air::_get_k_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 33)
     {
-             if (_temperature <  3250.0) temperatureOffset = 0;
-        else if (_temperature <  5250.0) temperatureOffset = 1;
-        else if (_temperature <  8750.0) temperatureOffset = 2;
-        else if (_temperature < 13750.0) temperatureOffset = 3;
-        else                             temperatureOffset = 4;
+             if (temperature <  3250.0) temperatureOffset = 0;
+        else if (temperature <  5250.0) temperatureOffset = 1;
+        else if (temperature <  8750.0) temperatureOffset = 2;
+        else if (temperature < 13750.0) temperatureOffset = 3;
+        else                            temperatureOffset = 4;
     }
 
     ///////////////////////////////////
@@ -969,10 +974,10 @@ uint32 Air::_get_k_row (double pressure) const
     ////////////////////
     else
     {
-             if (_temperature <  3750.0) temperatureOffset = 0;
-        else if (_temperature <  6250.0) temperatureOffset = 1;
-        else if (_temperature < 10750.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  3750.0) temperatureOffset = 0;
+        else if (temperature <  6250.0) temperatureOffset = 1;
+        else if (temperature < 10750.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     kOffset = pressureOffset + temperatureOffset;
@@ -987,9 +992,10 @@ uint32 Air::_get_k_row (double pressure) const
  *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
  *  @post none.
  *  @param pressure The order-of-magnitude of the pressure of interest.
+ *  @param temperature The temperature of the state in K.
  *  @return An index into the _mu_coeffs array.
 */
-uint32 Air::_get_mu_row (double pressure) const
+uint32 Air::_get_mu_row (double pressure, double temperature) const
 {
     uint32 temperatureOffset,
            pressureOffset,
@@ -1034,10 +1040,10 @@ uint32 Air::_get_mu_row (double pressure) const
     ////////////////////
     if (pressureOffset == 0)
     {
-             if (_temperature <  7750.0) temperatureOffset = 0;
-        else if (_temperature < 10750.0) temperatureOffset = 1;
-        else if (_temperature < 16750.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  7750.0) temperatureOffset = 0;
+        else if (temperature < 10750.0) temperatureOffset = 1;
+        else if (temperature < 16750.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     ///////////////////////////////////
@@ -1045,10 +1051,10 @@ uint32 Air::_get_mu_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 4)
     {
-             if (_temperature <  8250.0) temperatureOffset = 0;
-        else if (_temperature < 12250.0) temperatureOffset = 1;
-        else if (_temperature < 18750.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  8250.0) temperatureOffset = 0;
+        else if (temperature < 12250.0) temperatureOffset = 1;
+        else if (temperature < 18750.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     ///////////////////////////////////
@@ -1056,10 +1062,10 @@ uint32 Air::_get_mu_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 8)
     {
-             if (_temperature <  8750.0) temperatureOffset = 0;
-        else if (_temperature < 14250.0) temperatureOffset = 1;
-        else if (_temperature < 19750.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  8750.0) temperatureOffset = 0;
+        else if (temperature < 14250.0) temperatureOffset = 1;
+        else if (temperature < 19750.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     ///////////////////////////////////
@@ -1067,10 +1073,10 @@ uint32 Air::_get_mu_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 12)
     {
-             if (_temperature <  9750.0) temperatureOffset = 0;
-        else if (_temperature < 16750.0) temperatureOffset = 1;
-        else if (_temperature < 24500.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  9750.0) temperatureOffset = 0;
+        else if (temperature < 16750.0) temperatureOffset = 1;
+        else if (temperature < 24500.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     ///////////////////////////////////
@@ -1078,9 +1084,9 @@ uint32 Air::_get_mu_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 16)
     {
-             if (_temperature < 11250.0) temperatureOffset = 0;
-        else if (_temperature < 19750.0) temperatureOffset = 1;
-        else                             temperatureOffset = 2;
+             if (temperature < 11250.0) temperatureOffset = 0;
+        else if (temperature < 19750.0) temperatureOffset = 1;
+        else                            temperatureOffset = 2;
     }
 
     ///////////////////////////////////
@@ -1088,9 +1094,9 @@ uint32 Air::_get_mu_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 19)
     {
-             if (_temperature < 12750.0) temperatureOffset = 0;
-        else if (_temperature < 21500.0) temperatureOffset = 1;
-        else                             temperatureOffset = 2;
+             if (temperature < 12750.0) temperatureOffset = 0;
+        else if (temperature < 21500.0) temperatureOffset = 1;
+        else                            temperatureOffset = 2;
     }
 
 
@@ -1099,8 +1105,8 @@ uint32 Air::_get_mu_row (double pressure) const
     ////////////////////
     else
     {
-             if (_temperature < 15250.0) temperatureOffset = 0;
-        else                             temperatureOffset = 1;
+             if (temperature < 15250.0) temperatureOffset = 0;
+        else                            temperatureOffset = 1;
     }
 
 
@@ -1116,9 +1122,10 @@ uint32 Air::_get_mu_row (double pressure) const
  *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
  *  @post none.
  *  @param pressure The order-of-magnitude of the pressure of interest.
+ *  @param temperature The temperature of the state in K.
  *  @return An index into the _z_coeffs array.
 */
-uint32 Air::_get_z_row (double pressure) const
+uint32 Air::_get_z_row (double pressure, double temperature) const
 {
     uint32 temperatureOffset,
            pressureOffset,
@@ -1163,11 +1170,11 @@ uint32 Air::_get_z_row (double pressure) const
     ////////////////////
     if (pressureOffset == 0)
     {
-             if (_temperature <  2750.0) temperatureOffset = 0;
-        else if (_temperature <  5750.0) temperatureOffset = 1;
-        else if (_temperature <  8750.0) temperatureOffset = 2;
-        else if (_temperature < 17750.0) temperatureOffset = 3;
-        else                             temperatureOffset = 4;
+             if (temperature <  2750.0) temperatureOffset = 0;
+        else if (temperature <  5750.0) temperatureOffset = 1;
+        else if (temperature <  8750.0) temperatureOffset = 2;
+        else if (temperature < 17750.0) temperatureOffset = 3;
+        else                            temperatureOffset = 4;
     }
 
     ///////////////////////////////////
@@ -1175,11 +1182,11 @@ uint32 Air::_get_z_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 5)
     {
-             if (_temperature <  3250.0) temperatureOffset = 0;
-        else if (_temperature <  6750.0) temperatureOffset = 1;
-        else if (_temperature <  9750.0) temperatureOffset = 2;
-        else if (_temperature < 19750.0) temperatureOffset = 3;
-        else                             temperatureOffset = 4;
+             if (temperature <  3250.0) temperatureOffset = 0;
+        else if (temperature <  6750.0) temperatureOffset = 1;
+        else if (temperature <  9750.0) temperatureOffset = 2;
+        else if (temperature < 19750.0) temperatureOffset = 3;
+        else                            temperatureOffset = 4;
     }
 
     ///////////////////////////////////
@@ -1187,11 +1194,11 @@ uint32 Air::_get_z_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 10)
     {
-             if (_temperature <  3250.0) temperatureOffset = 0;
-        else if (_temperature <  7250.0) temperatureOffset = 1;
-        else if (_temperature < 11750.0) temperatureOffset = 2;
-        else if (_temperature < 21500.0) temperatureOffset = 3;
-        else                             temperatureOffset = 4;
+             if (temperature <  3250.0) temperatureOffset = 0;
+        else if (temperature <  7250.0) temperatureOffset = 1;
+        else if (temperature < 11750.0) temperatureOffset = 2;
+        else if (temperature < 21500.0) temperatureOffset = 3;
+        else                            temperatureOffset = 4;
     }
 
     ///////////////////////////////////
@@ -1199,11 +1206,11 @@ uint32 Air::_get_z_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 15)
     {
-             if (_temperature <  3750.0) temperatureOffset = 0;
-        else if (_temperature <  8250.0) temperatureOffset = 1;
-        else if (_temperature < 13750.0) temperatureOffset = 2;
-        else if (_temperature < 23500.0) temperatureOffset = 3;
-        else                             temperatureOffset = 4;
+             if (temperature <  3750.0) temperatureOffset = 0;
+        else if (temperature <  8250.0) temperatureOffset = 1;
+        else if (temperature < 13750.0) temperatureOffset = 2;
+        else if (temperature < 23500.0) temperatureOffset = 3;
+        else                            temperatureOffset = 4;
     }
 
     ///////////////////////////////////
@@ -1211,11 +1218,11 @@ uint32 Air::_get_z_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 20)
     {
-             if (_temperature <  5750.0) temperatureOffset = 0;
-        else if (_temperature <  9250.0) temperatureOffset = 1;
-        else if (_temperature < 15750.0) temperatureOffset = 2;
-        else if (_temperature < 23500.0) temperatureOffset = 3;
-        else                             temperatureOffset = 4;
+             if (temperature <  5750.0) temperatureOffset = 0;
+        else if (temperature <  9250.0) temperatureOffset = 1;
+        else if (temperature < 15750.0) temperatureOffset = 2;
+        else if (temperature < 23500.0) temperatureOffset = 3;
+        else                            temperatureOffset = 4;
     }
 
     ///////////////////////////////////
@@ -1223,10 +1230,10 @@ uint32 Air::_get_z_row (double pressure) const
     ////////////////////
     else if (pressureOffset == 25)
     {
-             if (_temperature <  5750.0) temperatureOffset = 0;
-        else if (_temperature <  9750.0) temperatureOffset = 1;
-        else if (_temperature < 17250.0) temperatureOffset = 2;
-        else                             temperatureOffset = 3;
+             if (temperature <  5750.0) temperatureOffset = 0;
+        else if (temperature <  9750.0) temperatureOffset = 1;
+        else if (temperature < 17250.0) temperatureOffset = 2;
+        else                            temperatureOffset = 3;
     }
 
     ///////////////////////////////////
@@ -1234,9 +1241,9 @@ uint32 Air::_get_z_row (double pressure) const
     ////////////////////
     else
     {
-             if (_temperature <  8750.0) temperatureOffset = 0;
-        else if (_temperature < 17750.0) temperatureOffset = 1;
-        else                             temperatureOffset = 2;
+             if (temperature <  8750.0) temperatureOffset = 0;
+        else if (temperature < 17750.0) temperatureOffset = 1;
+        else                            temperatureOffset = 2;
     }
 
     zOffset = pressureOffset + temperatureOffset;
@@ -1336,8 +1343,8 @@ double Air::_calculateEnthalpy (double pressure, double temperature) const
         // Based on the magnitude of the input pressure
         // and the temperature range, return an enthalpy
         // table location index
-        index[0] = _get_h_row(p1);
-        index[1] = _get_h_row(p2);
+        index[0] = _get_h_row(p1, temperature);
+        index[1] = _get_h_row(p2, temperature);
 
         for (uint32 i = 0; i < 2; ++i)
         {
@@ -1413,8 +1420,8 @@ double Air::_calculateSpecificHeat (double pressure, double temperature) const
         // Based on the magnitude of the input pressure
         // and the temperature range, return a specific heat
         // table location index
-        index[0] = _get_cp_row(p1);
-        index[1] = _get_cp_row(p2);
+        index[0] = _get_cp_row(p1, temperature);
+        index[1] = _get_cp_row(p2, temperature);
 
         for (uint32 i = 0; i < 2; ++i)
         {
@@ -1489,8 +1496,8 @@ double Air::_calculateThermalCond (double pressure, double temperature) const
         // Based on the magnitude of the input pressure
         // and the temperature range, return a therm. cond.
         // table location index
-        index[0] = _get_k_row(p1);
-        index[1] = _get_k_row(p2);
+        index[0] = _get_k_row(p1, temperature);
+        index[1] = _get_k_row(p2, temperature);
 
         for (uint32 i = 0; i < 2; ++i)
         {
@@ -1565,8 +1572,8 @@ double Air::_calculateCompFactor (double pressure, double temperature) const
         // Based on the magnitude of the input pressure
         // and the temperature range, return a comp. factor
         // table location index
-        index[0] = _get_z_row(p1);
-        index[1] = _get_z_row(p2);
+        index[0] = _get_z_row(p1, temperature);
+        index[1] = _get_z_row(p2, temperature);
 
         for (uint32 i = 0; i < 2; ++i)
         {
@@ -1634,8 +1641,8 @@ double Air::_calculateViscosity (double pressure, double temperature) const
         // Based on the magnitude of the input pressure
         // and the temperature range, return a viscosity
         // table location index
-        index[0] = _get_mu_row(p1);
-        index[1] = _get_mu_row(p2);
+        index[0] = _get_mu_row(p1, temperature);
+        index[1] = _get_mu_row(p2, temperature);
 
         for (uint32 i = 0; i < 2; ++i)
         {

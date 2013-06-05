@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-05-30                                             ||
+||    Last Edit Date: 2013-06-04                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -65,7 +65,7 @@
 /**
  *  @file air.h
  *  @author Gary Hammock, PE
- *  @date 2013-05-30
+ *  @date 2013-06-04
 */
 
 #ifndef _GH_DEF_AIR_H
@@ -382,9 +382,10 @@ class Air
      *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
      *  @post none.
      *  @param pressure The order-of-magnitude of the pressure of interest.
+     *  @param temperature The temperature of the state in K.
      *  @return An index into the _h_coeffs array.
     */
-    uint32 _get_h_row (double pressure) const;
+    uint32 _get_h_row (double pressure, double temperature) const;
 
     /** Determine the index of the specific heat coefficient array
      *  based on the pressure and temperature.
@@ -393,9 +394,10 @@ class Air
      *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
      *  @post none.
      *  @param pressure The order-of-magnitude of the pressure of interest.
+     *  @param temperature The temperature of the state in K.
      *  @return An index into the _cp_coeffs array.
     */
-    uint32 _get_cp_row (double pressure) const;
+    uint32 _get_cp_row (double pressure, double temperature) const;
 
     /** Determine the index of the thermal conductivity coefficient array
      *  based on the pressure and temperature.
@@ -404,9 +406,10 @@ class Air
      *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
      *  @post none.
      *  @param pressure The order-of-magnitude of the pressure of interest.
+     *  @param temperature The temperature of the state in K.
      *  @return An index into the _k_coeffs array.
     */
-    uint32 _get_k_row (double pressure) const;
+    uint32 _get_k_row (double pressure, double temperature) const;
 
     /** Determine the index of the viscosity coefficient array
      *  based on the pressure and temperature.
@@ -415,9 +418,10 @@ class Air
      *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
      *  @post none.
      *  @param pressure The order-of-magnitude of the pressure of interest.
+     *  @param temperature The temperature of the state in K.
      *  @return An index into the _mu_coeffs array.
     */
-    uint32 _get_mu_row (double pressure) const;
+    uint32 _get_mu_row (double pressure, double temperature) const;
 
     /** Determine the index of the compressibility coefficient array
      *  based on the pressure and temperature.
@@ -426,9 +430,10 @@ class Air
      *       10E-4 <= P <= 100 atm, 0 <= T <= 30000 K.
      *  @post none.
      *  @param pressure The order-of-magnitude of the pressure of interest.
+     *  @param temperature The temperature of the state in K.
      *  @return An index into the _z_coeffs array.
     */
-    uint32 _get_z_row (double pressure) const;
+    uint32 _get_z_row (double pressure, double temperature) const;
 
     /** Determine the upper and lower order of magnitudes
      *  based on the input pressure.
