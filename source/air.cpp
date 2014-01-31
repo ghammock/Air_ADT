@@ -340,7 +340,7 @@ double Air::getLewisNumber (void) const
  *
  *  @pre The object is instantiated.
  *  @post none.
- *  @return The value of _thermalDiff [units: m^s/s].
+ *  @return The value of _thermalDiff [units: m^2/s].
 */
 double Air::getThermalDiffusivity (void) const
 {  return _thermalDiff;  }

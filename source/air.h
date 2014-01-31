@@ -311,7 +311,7 @@ class Air
      *
      *  @pre The object is instantiated.
      *  @post none.
-     *  @return The value of _thermalDiff [units: m^s/s].
+     *  @return The value of _thermalDiff [units: m^2/s].
     */
     double getThermalDiffusivity (void) const;
 
