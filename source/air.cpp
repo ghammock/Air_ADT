@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-06-04                                             ||
+||    Last Edit Date: 2014-01-30                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -36,6 +36,10 @@
 ||        Publications.  2001.  (original copyright: New York.  John Wiley & ||
 ||        Sons.  1957.)  ISBN 978-0-486-41963-3.                             ||
 ||                                                                           ||
+||    Incropera, Frank P.  David P. DeWitt.  "Fundamentals of Heat and Mass  ||
+||        Transfer."  5th Edition.  John Wiley and Sons.  Hoboken, NJ, 2002. ||
+||        ISBN 0-471-38650-2.                                                ||
+||                                                                           ||
 ||===========================================================================||
 ||  LICENSE    (MIT/X11 License)                                             ||
 ||===========================================================================||
@@ -65,7 +69,7 @@
 /**
  *  @file air.cpp
  *  @author Gary Hammock, PE
- *  @date 2013-06-04
+ *  @date 2014-01-30
 */
 
 #include "air.h"
@@ -85,7 +89,8 @@ Air::Air()
     _density(0.0), _cp(0.0), _gamma(0.0), _k(0.0), _pr(0.0), _mu(0.0),
     _nu(0.0), _comp(0.0), _gasConstant(0.0), _molarMass(0.0),
     _entropy(0.0), _soundSpeed(0.0), _refraction(0.0),
-    _gibbsEnergy(0.0), _helmholtzEn(0.0), _chemPoten(0.0)
+    _gibbsEnergy(0.0), _helmholtzEn(0.0), _chemPoten(0.0),
+    _schmidt(0.0), _lewis(0.0), _thermalDiff(0.0)
 {}
 
 /** Copy constructor.
@@ -105,7 +110,8 @@ Air::Air (const Air &copyFrom)
     _molarMass(copyFrom._molarMass), _entropy(copyFrom._entropy),
     _soundSpeed(copyFrom._soundSpeed), _refraction(copyFrom._refraction),
     _gibbsEnergy(copyFrom._gibbsEnergy), _helmholtzEn(copyFrom._helmholtzEn),
-    _chemPoten(copyFrom._chemPoten)
+    _chemPoten(copyFrom._chemPoten), _schmidt(copyFrom._schmidt),
+    _lewis(copyFrom._lewis), _thermalDiff(copyFrom._thermalDiff)
 {}
 
 /** Initialization constructor.
@@ -312,6 +318,33 @@ double Air::getHelmholtzFreeEnergy (void) const
 double Air::getChemicalPotential (void) const
 {  return _chemPoten;  }
 
+/** Retrieve the Schmidt number of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _schmidt [-dimensionless-].
+*/
+double Air::getSchmidtNumber (void) const
+{  return _schmidt;  }
+
+/** Retrieve the Lewis number of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _lewis [-dimensionless-].
+*/
+double Air::getLewisNumber (void) const
+{  return _lewis;  }
+
+/** Retrieve the thermal diffusivity of the state.
+ *
+ *  @pre The object is instantiated.
+ *  @post none.
+ *  @return The value of _thermalDiff [units: m^s/s].
+*/
+double Air::getThermalDiffusivity (void) const
+{  return _thermalDiff;  }
+
 ////////////////////
 //    Setters
 ////////////////////
@@ -344,6 +377,9 @@ void Air::reset (void)
     _gibbsEnergy = 0.0;  // The specific Gibbs free energy [units: kJ/kg]
     _helmholtzEn = 0.0;  // The specific Helmholtz free energy [units: kJ/kg]
     _chemPoten   = 0.0;  // The chemical potential of air [units: kJ/kgmol]
+    _schmidt     = 0.0;  // The Schmidt number (Sc) [-dimensionless-]
+    _lewis       = 0.0;  // The Lewis number (Le) [-dimensionless-]
+    _thermalDiff = 0.0;  // Thermal diffusivity (alpha) [units: m^2/s]
 
     return;
 }
@@ -396,7 +432,7 @@ bool Air::calculateProperties (double pressure, double temperature)
     ////////////////////////////////////
 
     // Store the molar mass of air [units: kg/kgmol]
-    _molarMass = 28.96755;
+    _molarMass = 28.96755 / _comp;
 
     // Store the air gas constant in SI units [Units: kJ/(kg-K)]
     //    8.314 = Universal gas constant [units: kJ/kgmol-K]
@@ -415,7 +451,12 @@ bool Air::calculateProperties (double pressure, double temperature)
     //    1000.0 = convert MPa -> kPa
     _intEnergy = _enthalpy - (_pressure * 1000.0 / _density);
 
-    // Calculate the thermal conductivity [-dimensionless-]
+    // Calculate the thermal diffusivity [units: m^2/s]
+    //    1000.0 = convert W -> kW
+    _thermalDiff = _k / (1000.0 * _density * _cp);
+
+    // Calculate the Prandtl number (the ratio of thermal and momentum
+    // diffusivities) [-dimensionless-]
     //    1000.0 = convert kJ -> J. (So that J/s = W)
     _pr = _mu * _cp * 1000.0 / _k;
 
@@ -449,6 +490,16 @@ bool Air::calculateProperties (double pressure, double temperature)
     //
     //    ch = G / n = gm / n = gM
     _chemPoten = _gibbsEnergy * _molarMass;
+
+    // Calculate the Schmidt number assuming an air-O2 binary diffusion
+    // coefficient which is useful for calculating catalitic
+    // effects. [-dimensionless-]
+    //
+    //    0.24 x 10^-4 = binary diffusion coefficient of O2 in air at 298 K.
+    _schmidt = _nu / 0.21E-4;
+
+    // Calculate the Lewis number. [-dimensionless-]
+    _lewis = _schmidt / _pr;
 
     return true;
 }

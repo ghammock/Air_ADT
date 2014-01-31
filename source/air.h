@@ -4,7 +4,7 @@
 ||                                                                           ||
 ||    Author: Gary Hammock                                                   ||
 ||    Creation Date:  2010-02-08                                             ||
-||    Last Edit Date: 2013-06-04                                             ||
+||    Last Edit Date: 2014-01-30                                             ||
 ||                                                                           ||
 ||===========================================================================||
 ||  DESCRIPTION                                                              ||
@@ -36,6 +36,10 @@
 ||        Publications.  2001.  (original copyright: New York.  John Wiley & ||
 ||        Sons.  1957.)  ISBN 978-0-486-41963-3.                             ||
 ||                                                                           ||
+||    Incropera, Frank P.  David P. DeWitt.  "Fundamentals of Heat and Mass  ||
+||        Transfer."  5th Edition.  John Wiley and Sons.  Hoboken, NJ, 2002. ||
+||        ISBN 0-471-38650-2.                                                ||
+||                                                                           ||
 ||===========================================================================||
 ||  LICENSE    (MIT/X11 License)                                             ||
 ||===========================================================================||
@@ -65,7 +69,7 @@
 /**
  *  @file air.h
  *  @author Gary Hammock, PE
- *  @date 2013-06-04
+ *  @date 2014-01-30
 */
 
 #ifndef _GH_DEF_AIR_H
@@ -287,6 +291,30 @@ class Air
     */
     double getChemicalPotential (void) const;
 
+    /** Retrieve the Schmidt number of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _schmidt [-dimensionless-].
+    */
+    double getSchmidtNumber (void) const;
+
+    /** Retrieve the Lewis number of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _lewis [-dimensionless-].
+    */
+    double getLewisNumber (void) const;
+
+    /** Retrieve the thermal diffusivity of the state.
+     *
+     *  @pre The object is instantiated.
+     *  @post none.
+     *  @return The value of _thermalDiff [units: m^s/s].
+    */
+    double getThermalDiffusivity (void) const;
+
     ////////////////////
     //    Setters
     ////////////////////
@@ -346,7 +374,10 @@ class Air
            _refraction,   // The index of refraction of air [-dimensionless-]
            _gibbsEnergy,  // The specific Gibbs free energy [units: kJ/kg].
            _helmholtzEn,  // The specific Helmholtz free energy [units: kJ/kg]
-           _chemPoten;    // The chemical potential of air [units: kJ/kgmol]
+           _chemPoten,    // The chemical potential of air [units: kJ/kgmol]
+           _schmidt,      // The Schmidt number (Sc) [-dimensionless-]
+           _lewis,        // The Lewis number (Le) [-dimensionless-]
+           _thermalDiff;  // Thermal diffusivity (alpha) [units: m^2/s]
 
     static const double _R_univ;  // Universal gas constant [units: kJ/kgmol-K]
 
