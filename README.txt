@@ -13,6 +13,7 @@ The data are to be read and stored in typical SI units as follows:
     Temperature, K
     Pressure, MPa
     Enthalpy, kJ/kg
+    Internal Energy, kJ/kg
     Density, kg/m^3
     Specific Heat, kJ/kg-K
     Ratio of Specific Heats (Gamma), -dimensionless-
@@ -22,8 +23,16 @@ The data are to be read and stored in typical SI units as follows:
     Kinematic Viscosity, m^2/s
     Compressibility, -dimensionless-
     Gas Constant, kJ/kg-K
+    Molar Mass, kg/kmol
     Entropy, kJ/kg-K
     Speed of Sound, m/s
+    Refraction Index, -dimensionless-
+    Gibbs Free Energy, kJ/kg
+    Helmholtz Free Energy, kJ/kg
+    Chemical Potential, kg/kmol
+    Schmidt Number, -dimensionless-
+    Lewis Number, -dimensionless-
+    Thermal Diffusivity, m^2/s
 
 ================================================================================
                                IMPLEMENTATION
@@ -50,6 +59,7 @@ List of accessor methods used by the ADT:
     double getTemperature (void)
     double getPressure (void)
     double getEnthalpy (void)
+    double getInternalEnergy (void)
     double getDensity (void)
     double getSpecificHeat (void)
     double getGamma (void)
@@ -59,8 +69,16 @@ List of accessor methods used by the ADT:
     double getKinematicViscosity (void)
     double getCompressibilityFactor (void)
     double getGasConstant (void)
+    double getMolarMass (void)
     double getEntropy (void)
     double getSoundSpeed (void)
+    double getRefractionIndex (void)
+    double getGibbsFreeEnergy (void)
+    double getHelmholtzFreeEnergy (void)
+    double getChemicalPotential (void)
+    double getSchmidtNumber (void)
+    double getLewisNumber (void)
+    double getThermalDiffusivity (void)
     
 ================================================================================
                               DESIRED UPDATES
@@ -85,3 +103,7 @@ the high priority coefficient sets.
 3.) Liepmann, H. W., A. Roshko.  "Elements of Gasdynamics".  Dover Publications.
       2001.  (original copyright: New York.  John Wiley & Sons.  1957.)
       ISBN 978-0-486-41963-3.
+
+4.) Incropera, Frank P.  David P. DeWitt.  "Fundamentals of Heat and Mass
+      Transfer."  5th Edition.  John Wiley and Sons.  Hoboken, NJ, 2002.
+      ISBN 0-471-38650-2.
